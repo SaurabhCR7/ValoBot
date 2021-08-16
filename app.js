@@ -83,7 +83,7 @@ client.on('messageCreate', async (msg) => {
 	}
 
 	// Rank command
-	if (msg.content.startsWith('!!rank')) {
+	if (msg.content.startsWith('!!rank ')) {
 		if (msg.content.includes('#') === false) {
 			msg.channel.send('Use this format to get the rank : !!rank username#tag');
 			return;
@@ -93,7 +93,7 @@ client.on('messageCreate', async (msg) => {
 	}
 
 	// History command
-	if (msg.content.startsWith('!!history')) {
+	if (msg.content.startsWith('!!history ')) {
 		if (msg.content.includes('#') === false) {
 			msg.channel.send(
 				'Use this format to get the match summary : !!history username#tag'
