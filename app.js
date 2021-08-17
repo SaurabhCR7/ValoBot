@@ -77,7 +77,7 @@ client.on('messageCreate', async (msg) => {
 	// Help command
 	if (msg.content === '!!help') {
 		msg.channel.send(
-			'You can use the following commands : \n >>>  !!rank username#tag \n !!history username#tag'
+			'>>> Commands : \n !!rank username#tag \n !!history username#tag'
 		);
 		return;
 	}
