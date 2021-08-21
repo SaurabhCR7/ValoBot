@@ -44,8 +44,8 @@ const getHistory = async (username, tag) => {
 				str += `**${i.metadata.mode} : ${i.metadata.map}** \n`;
 
 				if (i.metadata.mode !== 'Deathmatch') {
-					str += i.teams.blue.has_won ? '**Won** \n' : '**Lost** \n';
-					str += `${i.teams.blue.rounds_won} : ${i.teams.red.rounds_won} \n`;
+					str += i.teams.red.has_won ? '**Won** \n' : '**Lost** \n';
+					str += `${i.teams.red.rounds_won} : ${i.teams.blue.rounds_won} \n`;
 				}
 
 				for (let player of i.players.all_players) {
