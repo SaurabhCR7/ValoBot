@@ -47,7 +47,7 @@ const getHistory = async (username, tag) => {
 						break;
 					}
 				}
-				if (i.metadata.mode === 'Custom Game') {
+				if (i.metadata.mode === undefined) {
 					continue;
 				} else if (i.metadata.mode === 'Deathmatch') {
 					match.won = null;
@@ -126,6 +126,6 @@ client.on('messageCreate', async (msg) => {
 
 // Client Login
 
-client.login('ODc2MDE2ODU2NTU1NzI4OTA2.YRd8Rg.HYSiOyXzh8r_4MIFSwz_4HEs2yU');
+//client.login('ODc2MDE2ODU2NTU1NzI4OTA2.YRd8Rg.HYSiOyXzh8r_4MIFSwz_4HEs2yU');
 
-//client.login(process.env.TOKEN);
+client.login(process.env.TOKEN);
