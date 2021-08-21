@@ -59,6 +59,30 @@ const getHistory = async (username, tag) => {
 	return str;
 };
 
+// Get the server status
+const getStatus = () => {
+	return fetch('https://api.henrikdev.xyz/valorant/v1/status/ap')
+		.then((res) => res.json())
+		.then((data) => {
+			if (data.status != 200) return false;
+			return true;
+		})
+		.catch((err) => false);
+};
+
+// Get patch notes
+const getPatch = () => {
+	return fetch(
+		'https://api.henrikdev.xyz/valorant/v1/website/en-us?filter=game_updates'
+	)
+		.then((res) => res.json())
+		.then((data, err) => {
+			if (data.status != 200) throw err;
+			return data.data[0];
+		})
+		.catch((err) => err.msg);
+};
+
 // Events
 
 // Ready event
@@ -71,15 +95,15 @@ client.on('messageCreate', async (msg) => {
 	if (msg.author.bot) return;
 
 	// Help command
-	if (msg.content === '!!help') {
+	if (msg.content === '>help') {
 		msg.channel.send(
-			'>>> **Commands** : \n !!rank username#tag \n !!history username#tag'
+			'>>> **Commands** : \n **>rank username#tag** : To view your rank \n **>recent username#tag** : To get the stats of recently played matches \n **>status** : To check the server status \n **>patch** : To get the latest patch notes'
 		);
 		return;
 	}
 
 	// Rank command
-	if (msg.content.startsWith('!!rank ')) {
+	if (msg.content.startsWith('>rank ')) {
 		if (msg.content.includes('#') === false) {
 			msg.channel.send('Use this format to get the rank : !!rank username#tag');
 			return;
@@ -91,7 +115,7 @@ client.on('messageCreate', async (msg) => {
 	}
 
 	// History command
-	if (msg.content.startsWith('!!history ')) {
+	if (msg.content.startsWith('>recent ')) {
 		if (msg.content.includes('#') === false) {
 			msg.channel.send(
 				'Use this format to get the match summary : !!history username#tag'
@@ -106,6 +130,22 @@ client.on('messageCreate', async (msg) => {
 			})
 			.catch((err) => msg.channel.send('Invalid username or tag !!'));
 		return;
+	}
+
+	// Server Status command
+	if (msg.content.startsWith('>status')) {
+		msg.channel.send(
+			getStatus() ? 'Server is up and running !!' : 'Server Down !!'
+		);
+	}
+
+	// Patch Notes command
+	if (msg.content.startsWith('>patch')) {
+		getPatch().then((patch) => {
+			msg.channel.send(`>>> Read Here : ${patch.url}`, {
+				files: [patch.banner_url],
+			});
+		});
 	}
 });
 
