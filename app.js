@@ -9,8 +9,8 @@ const client = new Client({
 // Get Username and Tagline
 const getUser = (id) => {
 	const valoId = id.substring(id.indexOf(' ') + 1, id.length);
-	const username = valoId.split('#')[0];
-	const tag = valoId.split('#')[1];
+	const username = encodeURI(valoId.split('#')[0]);
+	const tag = encodeURI(valoId.split('#')[1]);
 	return { username, tag };
 };
 
@@ -29,38 +29,34 @@ const getRank = (username, tag) => {
 
 // Get the match history
 const getHistory = async (username, tag) => {
-	let matches = [];
+	let str = '';
 	await fetch(
 		`https://api.henrikdev.xyz/valorant/v3/matches/ap/${username}/${tag}`
 	)
 		.then((res) => res.json())
 		.then((data, err) => {
 			if (data.status != 200) throw err;
+			let id = data.puuid;
 			for (let i of data.data) {
-				let match = {
-					map: i.metadata.map,
-					mode: i.metadata.mode,
-				};
+				if (i.metadata.mode === undefined || i.metadata.mode === 'Custom Game')
+					continue;
+
+				str += `**${i.metadata.mode} : ${i.metadata.map}** \n`;
+
+				if (i.metadata.mode !== 'Deathmatch') {
+					str += i.teams.blue.has_won ? '**Won** \n' : '**Lost** \n';
+					str += `${i.teams.blue.rounds_won} : ${i.teams.red.rounds_won} \n`;
+				}
+
 				for (let player of i.players.all_players) {
-					if (player.name === username && player.tag === tag) {
-						match.kda = `K : ${player.stats.kills} | D : ${player.stats.deaths} | A : ${player.stats.assists}`;
+					if (id === player.puuid) {
+						str += `K : ${player.stats.kills} | D : ${player.stats.deaths} | A : ${player.stats.assists} \n \n`;
 						break;
 					}
 				}
-				if (i.metadata.mode === undefined) {
-					continue;
-				} else if (i.metadata.mode === 'Deathmatch') {
-					match.won = null;
-					match.score = null;
-				} else {
-					match.won = i.teams.red.has_won ? 'Won' : 'Lost';
-					match.score = `${i.teams.red.rounds_won} : ${i.teams.blue.rounds_won}`;
-				}
-
-				matches.push(match);
 			}
 		});
-	return matches;
+	return str;
 };
 
 // Events
@@ -77,7 +73,7 @@ client.on('messageCreate', async (msg) => {
 	// Help command
 	if (msg.content === '!!help') {
 		msg.channel.send(
-			'>>> Commands : \n !!rank username#tag \n !!history username#tag'
+			'>>> **Commands** : \n !!rank username#tag \n !!history username#tag'
 		);
 		return;
 	}
@@ -89,7 +85,9 @@ client.on('messageCreate', async (msg) => {
 			return;
 		}
 		const { username, tag } = getUser(msg.content);
-		getRank(username, tag).then((rank) => msg.channel.send(rank));
+		getRank(username, tag).then((rank) =>
+			msg.channel.send(`<@${msg.author.id}> : ` + rank)
+		);
 	}
 
 	// History command
@@ -104,28 +102,14 @@ client.on('messageCreate', async (msg) => {
 
 		getHistory(username, tag)
 			.then((history) => {
-				for (let i of history) {
-					if (i.mode === 'Deathmatch') {
-						msg.channel.send(` >>> ${i.mode} : ${i.map} \n ${i.kda}`);
-					} else {
-						msg.channel.send(
-							` >>> ${i.mode} : ${i.map} \n **${i.score}** \n ${i.kda} \n **${i.won}**`
-						);
-					}
-				}
+				msg.channel.send(`>>> <@${msg.author.id}> \n \n` + history);
 			})
 			.catch((err) => msg.channel.send('Invalid username or tag !!'));
-		return;
-	}
-
-	if (msg.content === 'ping') {
-		msg.channel.send('pong');
 		return;
 	}
 });
 
 // Client Login
+client.login('ODc2MDE2ODU2NTU1NzI4OTA2.YRd8Rg.HYSiOyXzh8r_4MIFSwz_4HEs2yU');
 
-//client.login('ODc2MDE2ODU2NTU1NzI4OTA2.YRd8Rg.HYSiOyXzh8r_4MIFSwz_4HEs2yU');
-
-client.login(process.env.TOKEN);
+//client.login(process.env.TOKEN);
