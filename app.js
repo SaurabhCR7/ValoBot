@@ -142,9 +142,7 @@ client.on('messageCreate', async (msg) => {
 	// Patch Notes command
 	if (msg.content.startsWith('>patch')) {
 		getPatch().then((patch) => {
-			msg.channel.send(`>>> Read Here : ${patch.url}`, {
-				files: [patch.banner_url],
-			});
+			msg.channel.send(`>>> Read Here : ${patch.url}`);
 		});
 	}
 });
