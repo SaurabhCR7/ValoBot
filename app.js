@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { Client, Intents } = require('discord.js');
+const { Client, Intents, MessageEmbed } = require('discord.js');
 const client = new Client({
 	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 });
@@ -43,13 +43,17 @@ const getHistory = async (username, tag) => {
 
 				str += `**${i.metadata.mode} : ${i.metadata.map}** \n`;
 
-				if (i.metadata.mode !== 'Deathmatch') {
-					str += i.teams.red.has_won ? '**Won** \n' : '**Lost** \n';
-					str += `${i.teams.red.rounds_won} : ${i.teams.blue.rounds_won} \n`;
-				}
-
 				for (let player of i.players.all_players) {
 					if (id === player.puuid) {
+						if (i.metadata.mode !== 'Deathmatch') {
+							if (player.team === 'Red') {
+								str += i.teams.red.has_won ? '**Won** \n' : '**Lost** \n';
+								str += `${i.teams.red.rounds_won} : ${i.teams.blue.rounds_won} \n`;
+							} else {
+								str += i.teams.blue.has_won ? '**Won** \n' : '**Lost** \n';
+								str += `${i.teams.blue.rounds_won} : ${i.teams.red.rounds_won} \n`;
+							}
+						}
 						str += `K : ${player.stats.kills} | D : ${player.stats.deaths} | A : ${player.stats.assists} \n \n`;
 						break;
 					}
@@ -96,28 +100,42 @@ client.on('messageCreate', async (msg) => {
 
 	// Help command
 	if (msg.content === '>help') {
-		msg.channel.send(
-			'>>> **Commands** : \n **>rank username#tag** : To view your rank \n **>recent username#tag** : To get the stats of recently played matches \n **>status** : To check the server status \n **>patch** : To get the latest patch notes'
-		);
+		const embed = new MessageEmbed()
+			.setColor('#0099ff')
+			.setTitle('COMMANDS')
+			.setThumbnail('https://c.tenor.com/wuYSt-pgcoEAAAAM/valorant-games.gif')
+			.setDescription(
+				'`>rank username#tag` - Shows your rank \n `>recent username#tag` - Shows recently played matches \n `>status` - Shows the server status \n `>patch` - Shows the latest patch notes'
+			)
+			.setTimestamp();
+
+		msg.reply({ embeds: [embed] });
+
 		return;
 	}
 
 	// Rank command
 	if (msg.content.startsWith('>rank ')) {
 		if (msg.content.includes('#') === false) {
-			msg.channel.send('Use this format to get the rank : !!rank username#tag');
+			msg.reply('Use this format to get the rank : !!rank username#tag');
 			return;
 		}
+
 		const { username, tag } = getUser(msg.content);
-		getRank(username, tag).then((rank) =>
-			msg.channel.send(`<@${msg.author.id}> : ` + rank)
-		);
+		getRank(username, tag).then((rank) => {
+			const embed = new MessageEmbed()
+				.setColor('#0099ff')
+				.setTitle('RANK')
+				.setDescription(rank);
+			msg.reply({ embeds: [embed] });
+		});
+		return;
 	}
 
 	// History command
 	if (msg.content.startsWith('>recent ')) {
 		if (msg.content.includes('#') === false) {
-			msg.channel.send(
+			msg.reply(
 				'Use this format to get the match summary : !!history username#tag'
 			);
 			return;
@@ -126,24 +144,41 @@ client.on('messageCreate', async (msg) => {
 
 		getHistory(username, tag)
 			.then((history) => {
-				msg.channel.send(`>>> <@${msg.author.id}> \n \n` + history);
+				const embed = new MessageEmbed()
+					.setColor('#0099ff')
+					.setTitle('RECENT MATCHES')
+					.setThumbnail(
+						'https://c.tenor.com/wuYSt-pgcoEAAAAM/valorant-games.gif'
+					)
+					.setDescription(history)
+					.setTimestamp();
+				msg.reply({ embeds: [embed] });
 			})
-			.catch((err) => msg.channel.send('Invalid username or tag !!'));
+			.catch((err) => msg.reply('Invalid username or tag !!'));
 		return;
 	}
 
 	// Server Status command
 	if (msg.content.startsWith('>status')) {
-		msg.channel.send(
-			getStatus() ? 'Server is up and running !!' : 'Server Down !!'
-		);
+		const embed = new MessageEmbed()
+			.setColor('#0099ff')
+			.setTitle('SERVER STATUS')
+			.setThumbnail('https://c.tenor.com/wuYSt-pgcoEAAAAM/valorant-games.gif')
+			.setDescription(
+				getStatus()
+					? 'Server is up and running fine !!'
+					: 'Server is down right now. Please try again after some time !!'
+			);
+		msg.reply({ embeds: [embed] });
+		return;
 	}
 
 	// Patch Notes command
 	if (msg.content.startsWith('>patch')) {
 		getPatch().then((patch) => {
-			msg.channel.send(`>>> Read Here : ${patch.url}`);
+			msg.reply('>>> Read Here : ' + patch.url);
 		});
+		return;
 	}
 });
 
