@@ -74,7 +74,7 @@ const getStatus = () => {
 // Get patch notes
 const getPatch = () => {
 	return fetch(
-		'https://api.henrikdev.xyz/valorant/v1/website/en-us?filter=game_update'
+		'https://api.henrikdev.xyz/valorant/v1/website/en-us?filter=game_updates'
 	)
 		.then((res) => res.json())
 		.then(handleErrors)
