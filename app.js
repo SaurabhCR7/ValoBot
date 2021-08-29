@@ -1,10 +1,10 @@
 const fetch = require('node-fetch');
-const { Client, Intents, MessageEmbed } = require('discord.js');
+const { Client, Intents, MessageEmbed, Channel } = require('discord.js');
 const client = new Client({
 	intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 });
 
-// Functions
+// ->Functions
 
 // Get Username and Tagline
 const getUser = (id) => {
@@ -19,12 +19,10 @@ const getRank = (username, tag) => {
 	return fetch(
 		`https://api.henrikdev.xyz/valorant/v1/mmr/ap/${username}/${tag}`
 	)
+		.then(handleErrors)
 		.then((res) => res.json())
-		.then((data) => {
-			if (data.status != 200) return 'Invalid username or tag !!';
-			else return data.data.currenttierpatched;
-		})
-		.catch((err) => 'The account has not acquired a rank yet !!');
+		.then((data) => data.data.currenttierpatched)
+		.catch(() => 'Invalid username / Not enough recent competitive games.');
 };
 
 // Get the match history
@@ -33,9 +31,9 @@ const getHistory = async (username, tag) => {
 	await fetch(
 		`https://api.henrikdev.xyz/valorant/v3/matches/ap/${username}/${tag}`
 	)
+		.then(handleErrors)
 		.then((res) => res.json())
-		.then((data, err) => {
-			if (data.status != 200) throw err;
+		.then((data) => {
 			let id = data.puuid;
 			for (let i of data.data) {
 				if (i.metadata.mode === undefined || i.metadata.mode === 'Custom Game')
@@ -59,7 +57,8 @@ const getHistory = async (username, tag) => {
 					}
 				}
 			}
-		});
+		})
+		.catch((err) => err);
 	return str;
 };
 
@@ -67,27 +66,63 @@ const getHistory = async (username, tag) => {
 const getStatus = () => {
 	return fetch('https://api.henrikdev.xyz/valorant/v1/status/ap')
 		.then((res) => res.json())
-		.then((data) => {
-			if (data.status != 200) return false;
-			return true;
-		})
-		.catch((err) => false);
+		.then(handleErrors)
+		.then((data) => true)
+		.catch(() => false);
 };
 
 // Get patch notes
 const getPatch = () => {
 	return fetch(
-		'https://api.henrikdev.xyz/valorant/v1/website/en-us?filter=game_updates'
+		'https://api.henrikdev.xyz/valorant/v1/website/en-us?filter=game_update'
 	)
 		.then((res) => res.json())
-		.then((data, err) => {
-			if (data.status != 200) throw err;
-			return data.data[0];
+		.then(handleErrors)
+		.then((data) => {
+			for (let i of data.data) {
+				if (i.title.includes('Patch')) return i.url;
+			}
 		})
-		.catch((err) => err.msg);
+		.catch((err) => err);
 };
 
-// Events
+// Handle Errors
+const handleErrors = (res) => {
+	if (res.status != 200) {
+		throw Error('Failed to load. Try again later !!');
+	}
+	return res;
+};
+
+// ->Data
+
+// Ranks
+const ranks = {
+	'Iron 1': 3,
+	'Iron 2': 4,
+	'Iron 3': 5,
+	'Bronze 1': 6,
+	'Bronze 2': 7,
+	'Bronze 3': 8,
+	'Silver 1': 9,
+	'Silver 2': 10,
+	'Silver 3': 11,
+	'Gold 1': 12,
+	'Gold 2': 13,
+	'Gold 3': 14,
+	'Platinum 1': 15,
+	'Platinum 2': 16,
+	'Platinum 3': 17,
+	'Diamond 1': 18,
+	'Diamond 2': 19,
+	'Diamond 3': 20,
+	'Immortal 1': 21,
+	'Immortal 2': 22,
+	'Immortal 3': 23,
+	Radiant: 24,
+};
+
+// ->Events
 
 // Ready event
 client.on('ready', () => {
@@ -126,6 +161,9 @@ client.on('messageCreate', async (msg) => {
 			const embed = new MessageEmbed()
 				.setColor('#0099ff')
 				.setTitle('RANK')
+				.setThumbnail(
+					`https://trackercdn.com/cdn/tracker.gg/valorant/icons/tiers/${ranks[rank]}.png`
+				)
 				.setDescription(rank);
 			msg.reply({ embeds: [embed] });
 		});
@@ -176,7 +214,7 @@ client.on('messageCreate', async (msg) => {
 	// Patch Notes command
 	if (msg.content.startsWith('>patch')) {
 		getPatch().then((patch) => {
-			msg.reply('>>> Read Here : ' + patch.url);
+			msg.reply('>>> Read Here : ' + patch);
 		});
 		return;
 	}
