@@ -1,4 +1,29 @@
-# valorant-stats
-Invite the bot here: https://discord.com/api/oauth2/authorize?client_id=876016856555728906&permissions=259846040640&scope=bot
+# ValoBot
+## _The Best Valorant Discord Bot, Ever_
 
-If u want to setup the Bot yourself, please go for it, but i don't provide any help doing this. It also could be that some files are missing :D
+[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://github.com/SaurabhCR7/ValoBot)
+
+Valorant Stats is a Discord Bot which uses RIOT API to fetch your Valorant Stats.
+
+
+## Commands
+
+- `>help` - Lists all the supported commands 
+- `>rank username#tag` - Shows your rank
+- `>recent username#tag` - Shows recently played matches
+- `>competitive username#tag` - Shows rank changes in competitive matches
+- `>status`  - Shows the server status
+- `>patch` - Shows the latest patch notes
+
+
+## Installation
+
+ValoBot requires [Node.js](https://nodejs.org/) v16+ to run.
+
+Install the dependencies and devDependencies and start the server.
+
+```sh
+cd ValoBot
+npm i
+node app.js
+```
