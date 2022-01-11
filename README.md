@@ -3,8 +3,6 @@
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://discord.com/api/oauth2/authorize?client_id=876016856555728906&permissions=259846040640&scope=bot)
 
-[![Youtube](https://cdn.iconscout.com/icon/free/png-256/youtube-1865882-1581898.png)](https://youtu.be/bJr5KiiF_9w)
-
 Valorant Stats is a Discord Bot which uses RIOT API to fetch your Valorant Stats.
 
 
@@ -16,6 +14,9 @@ Valorant Stats is a Discord Bot which uses RIOT API to fetch your Valorant Stats
 - `>competitive username#tag` - Shows rank changes in competitive matches
 - `>status`  - Shows the server status
 - `>patch` - Shows the latest patch notes
+
+## Preview
+[![Youtube](https://cdn.iconscout.com/icon/free/png-256/youtube-1865882-1581898.png)](https://youtu.be/bJr5KiiF_9w)
 
 
 ## Installation
