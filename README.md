@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://discord.com/api/oauth2/authorize?client_id=876016856555728906&permissions=259846040640&scope=bot)
 
-[![Youtube](https://cliply.co/wp-content/uploads/2019/04/371903520_SOCIAL_ICONS_YOUTUBE.png)](https://youtu.be/bJr5KiiF_9w)
+[![Youtube](https://cdn-icons-png.flaticon.com/512/1384/1384060.png)](https://youtu.be/bJr5KiiF_9w)
 
 Valorant Stats is a Discord Bot which uses RIOT API to fetch your Valorant Stats.
 
