@@ -1,7 +1,7 @@
 # ValoBot
 ## _The Best Valorant Discord Bot, Ever_
 
-[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://github.com/SaurabhCR7/ValoBot)
+[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://discord.com/api/oauth2/authorize?client_id=876016856555728906&permissions=259846040640&scope=bot)
 
 Valorant Stats is a Discord Bot which uses RIOT API to fetch your Valorant Stats.
 
