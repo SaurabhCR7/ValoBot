@@ -25,6 +25,28 @@ const getRank = (username, tag) => {
 		.catch(() => 'Invalid username / Not enough recent competitive games.');
 };
 
+const getCompetitiveHistory = (username, tag) => {
+	let str = '';
+	return fetch(
+		`https://api.henrikdev.xyz/valorant/v1/mmr-history/ap/${username}/${tag}`
+	)
+		.then(handleErrors)
+		.then((res) => res.json())
+		.then((data) => {
+			str += `**${data.name} : ${data.tag}** \n`;
+			for (let i of data.data) {
+				str += `**Played on**: ${i.date} \n`;
+				str += `**Rank**: ${i.currenttierpatched} \n`;
+				if (i.mmr_change_to_last_game > 0)
+					str += `**RR Change**: +${i.mmr_change_to_last_game} \n`;
+				else str += `**RR Change**: ${i.mmr_change_to_last_game} \n`;
+				str += `**ELO**: ${i.elo} \n \n`;
+			}
+			return str;
+		})
+		.catch(() => 'Invalid username / Not enough recent competitive games.');
+};
+
 // Get the match history
 const getHistory = async (username, tag) => {
 	let str = '';
@@ -34,7 +56,7 @@ const getHistory = async (username, tag) => {
 		.then(handleErrors)
 		.then((res) => res.json())
 		.then((data) => {
-			let id = data.puuid;
+			console.log(data);
 			for (let i of data.data) {
 				if (i.metadata.mode === undefined || i.metadata.mode === 'Custom Game')
 					continue;
@@ -42,19 +64,17 @@ const getHistory = async (username, tag) => {
 				str += `**${i.metadata.mode} : ${i.metadata.map}** \n`;
 
 				for (let player of i.players.all_players) {
-					if (id === player.puuid) {
-						if (i.metadata.mode !== 'Deathmatch') {
-							if (player.team === 'Red') {
-								str += i.teams.red.has_won ? '**Won** \n' : '**Lost** \n';
-								str += `${i.teams.red.rounds_won} : ${i.teams.blue.rounds_won} \n`;
-							} else {
-								str += i.teams.blue.has_won ? '**Won** \n' : '**Lost** \n';
-								str += `${i.teams.blue.rounds_won} : ${i.teams.red.rounds_won} \n`;
-							}
+					if (i.metadata.mode !== 'Deathmatch') {
+						if (player.team === 'Red') {
+							str += i.teams.red.has_won ? '**Won** \n' : '**Lost** \n';
+							str += `${i.teams.red.rounds_won} : ${i.teams.blue.rounds_won} \n`;
+						} else {
+							str += i.teams.blue.has_won ? '**Won** \n' : '**Lost** \n';
+							str += `${i.teams.blue.rounds_won} : ${i.teams.red.rounds_won} \n`;
 						}
-						str += `K : ${player.stats.kills} | D : ${player.stats.deaths} | A : ${player.stats.assists} \n \n`;
-						break;
 					}
+					str += `K : ${player.stats.kills} | D : ${player.stats.deaths} | A : ${player.stats.assists} \n \n`;
+					break;
 				}
 			}
 		})
@@ -140,7 +160,7 @@ client.on('messageCreate', async (msg) => {
 			.setTitle('COMMANDS')
 			.setThumbnail('https://c.tenor.com/wuYSt-pgcoEAAAAM/valorant-games.gif')
 			.setDescription(
-				'`>rank username#tag` - Shows your rank \n `>recent username#tag` - Shows recently played matches \n `>status` - Shows the server status \n `>patch` - Shows the latest patch notes'
+				'`>rank username#tag` - Shows your rank \n `>recent username#tag` - Shows recently played matches \n `>competitive username#tag` - Shows rank changes in competitive matches \n `>status` - Shows the server status \n `>patch` - Shows the latest patch notes'
 			)
 			.setTimestamp();
 
@@ -152,14 +172,14 @@ client.on('messageCreate', async (msg) => {
 	// Rank command
 	if (msg.content.startsWith('>rank ')) {
 		if (msg.content.includes('#') === false) {
-			msg.reply('Use this format to get the rank : !!rank username#tag');
+			msg.reply('Use this format to get the rank : >rank username#tag');
 			return;
 		}
 
 		const { username, tag } = getUser(msg.content);
 		getRank(username, tag).then((rank) => {
 			const embed = new MessageEmbed()
-				.setColor('#0099ff')
+				.setColor('#228c22')
 				.setTitle('RANK')
 				.setThumbnail(
 					`https://trackercdn.com/cdn/tracker.gg/valorant/icons/tiers/${ranks[rank]}.png`
@@ -168,6 +188,27 @@ client.on('messageCreate', async (msg) => {
 			msg.reply({ embeds: [embed] });
 		});
 		return;
+	}
+
+	if (msg.content.startsWith('>competitive')) {
+		if (msg.content.includes('#') === false) {
+			msg.reply(
+				'Use this format to get the match summary : !!history username#tag'
+			);
+			return;
+		}
+		const { username, tag } = getUser(msg.content);
+
+		getCompetitiveHistory(username, tag).then((comp) => {
+			//console.log(comp);
+			const embed = new MessageEmbed()
+				.setColor('#B026FF')
+				.setTitle('COMPETITIVE HISTORY')
+				.setThumbnail('https://c.tenor.com/wuYSt-pgcoEAAAAM/valorant-games.gif')
+				.setDescription(comp)
+				.setTimestamp();
+			msg.reply({ embeds: [embed] });
+		});
 	}
 
 	// History command
